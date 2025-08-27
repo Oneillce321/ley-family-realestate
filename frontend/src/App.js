@@ -7,18 +7,18 @@ function App() {
   const [properties, setProperties] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/owners")
+    fetch("https://ley-family-realestate.onrender.com/owners")
       .then(res => res.json())
       .then(data => setOwners(data));
   }, []);
 
   useEffect(() => {
     if (selectedOwner) {
-      fetch(`http://localhost:8000/properties?owner_id=${selectedOwner}`)
+      fetch(`https://ley-family-realestate.onrender.com/properties?owner_id=${selectedOwner}`)
         .then(res => res.json())
         .then(data => setProperties(data));
     } else {
-      fetch("http://localhost:8000/properties")
+      fetch("https://ley-family-realestate.onrender.com/properties")
         .then(res => res.json())
         .then(data => setProperties(data));
     }
