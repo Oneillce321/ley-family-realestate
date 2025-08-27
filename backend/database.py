@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
+import os
 
 
 # Load the Excel file and read the specified sheet
@@ -8,7 +9,8 @@ df = pd.read_excel("Schedule of Land with Owners.xlsx", sheet_name="Property Lis
 # Clean up the DataFrame
 df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
 
-engine = create_engine("postgresql://postgres:Yofoj4%40321@localhost:5432/real_estate")
+url = os.getenv("DATABASE_URL")
+engine = create_engine(url)
 
 print(df.info())
 

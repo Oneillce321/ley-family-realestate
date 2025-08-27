@@ -3,18 +3,20 @@ from sqlalchemy import create_engine
 import pandas as pd
 import json
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React dev server
+    allow_origins=["*"],  # React dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-engine = create_engine("postgresql://postgres:Yofoj4%40321@localhost:5432/real_estate")
+#Have to set database URL
+url = os.getenv("DATABASE_URL")
+engine = create_engine(url)
 
 @app.get("/owners")
 def get_owners():
