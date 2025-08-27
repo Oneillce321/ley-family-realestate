@@ -3,11 +3,10 @@ from sqlalchemy import create_engine
 
 
 # Load the Excel file and read the specified sheet
-df = pd.read_excel("Schedule of Land with Owners.xlsx", sheet_name="SCHEDULE OF LAND", skiprows=2, nrows=38)
+df = pd.read_excel("Schedule of Land with Owners.xlsx", sheet_name="Property List", skiprows=3, nrows=38)
 
 # Clean up the DataFrame
 df.columns = [c.strip().lower().replace(" ", "_") for c in df.columns]
-df = df.drop(columns=["unnamed:_14"])
 
 engine = create_engine("postgresql://postgres:Yofoj4%40321@localhost:5432/real_estate")
 

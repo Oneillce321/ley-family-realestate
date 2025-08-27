@@ -17,6 +17,10 @@ function App() {
       fetch(`http://localhost:8000/properties?owner_id=${selectedOwner}`)
         .then(res => res.json())
         .then(data => setProperties(data));
+    } else {
+      fetch("http://localhost:8000/properties")
+        .then(res => res.json())
+        .then(data => setProperties(data));
     }
   }, [selectedOwner]);
 
@@ -41,7 +45,9 @@ function App() {
         <thead>
           <tr>
             <th className="border p-2">Asset #</th>
+            <th className="border p-2">Legal Description</th>
             <th className="border p-2">Location</th>
+            <th className="border p-2">Account Number</th>
             <th className="border p-2">Acres</th>
             <th className="border p-2">Owned By</th>
           </tr>
@@ -50,7 +56,9 @@ function App() {
           {properties.map((prop, idx) => (
             <tr key={idx}>
               <td className="border p-2">{prop["asset_#"]}</td>
+              <td className="border p-2">{prop.legal_description}</td>
               <td className="border p-2">{prop.location}</td>
+              <td className="border p-2">{prop.account_number}</td>
               <td className="border p-2">{prop.acres}</td>
               <td className="border p-2">{prop.owned_by}</td>
             </tr>
