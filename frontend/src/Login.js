@@ -5,7 +5,7 @@ function Login({ setLoggedIn }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch("http://127.0.0.1:8000/login", {
+    const res = await fetch("https://ley-family-realestate.onrender.com/login", {
       method: "POST",
       headers: {
         Authorization: "Basic " + btoa("user:" + password),

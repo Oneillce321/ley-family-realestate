@@ -25,18 +25,18 @@ function Properties() {
     });
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/owners")
+    fetch("https://ley-family-realestate.onrender.com/owners")
       .then(res => res.json())
       .then(data => setOwners(data));
   }, []);
 
   useEffect(() => {
     if (selectedOwner) {
-      fetch(`http://127.0.0.1:8000/properties?owner_id=${selectedOwner}`)
+      fetch(`https://ley-family-realestate.onrender.com/properties?owner_id=${selectedOwner}`)
         .then(res => res.json())
         .then(data => setProperties(data));
     } else {
-      fetch("http://127.0.0.1:8000/properties")
+      fetch("https://ley-family-realestate.onrender.com/properties")
         .then(res => res.json())
         .then(data => setProperties(data));
     }
@@ -60,7 +60,7 @@ function Properties() {
         }
     });
 
-    fetch("http://127.0.0.1:8000/properties", {
+    fetch("https://ley-family-realestate.onrender.com/properties", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
