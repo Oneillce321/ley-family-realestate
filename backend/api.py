@@ -1,11 +1,39 @@
-from fastapi import FastAPI
-from sqlalchemy import create_engine
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from pydantic import BaseModel
+from typing import Optional
+from sqlalchemy import create_engine, text
 import pandas as pd
 import json
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
 app = FastAPI()
+security = HTTPBasic()
+
+SHARED_PASSWORD = os.getenv("APP_PASSWORD", "changeme")
+
+class Property(BaseModel):
+    asset_num: str
+    legal_description: Optional[str] = None
+    location: Optional[str] = None
+    account_number: Optional[str] = None
+    current_appraisal: Optional[float] = None
+    square_footage: Optional[float] = None
+    acres: Optional[float] = None
+    total_acreage_percent: Optional[float] = None
+    owned_by: Optional[str] = None
+    exemption: Optional[str] = None
+    county: Optional[str] = None
+    name_on_account: Optional[str] = None
+    mailing_address: Optional[str] = None
+    management_notes: Optional[str] = None
+    status: Optional[str] = None
+
+def check_password(credentials: HTTPBasicCredentials = Depends(security)):
+    if credentials.password != SHARED_PASSWORD:
+        raise HTTPException(status_code=401, detail="Invalid password")
+    return True
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,6 +45,10 @@ app.add_middleware(
 #Have to set database URL
 url = os.getenv("DATABASE_URL")
 engine = create_engine(url)
+
+@app.post("/login")
+def login(auth: bool = Depends(check_password)):
+    return {"message": "Login successful"}
 
 @app.get("/owners")
 def get_owners():
@@ -38,3 +70,40 @@ def get_properties(owner_id: int = None):
 
     # Convert safely to JSON-serializable object
     return json.loads(df.to_json(orient="records"))
+
+@app.post("/properties")
+def add_property(prop: Property):
+    
+    query = text("""
+    INSERT INTO properties (
+        "asset_#", legal_description, location, account_number, current_appraisal,
+        square_footage, acres, "%_of_total_acreage", owned_by, exemption,
+        county, name_on_account, mailing_address, management_notes, status
+    ) VALUES (
+        :asset_num, :legal_description, :location, :account_number, :current_appraisal,
+        :square_footage, :acres, :total_acreage_percent, :owned_by, :exemption,
+        :county, :name_on_account, :mailing_address, :management_notes, :status
+    ) RETURNING "asset_#";
+    """)
+
+    with engine.begin() as conn:
+
+        exists = conn.execute(
+            text('SELECT 1 FROM properties WHERE "asset_#" = :asset_num'),
+            {"asset_num": prop.asset_num}
+        ).first()
+        
+        if exists:
+            return {"error": "Asset number already exists."}
+        
+        owners = ["JLA", "DLE", "SE", "JE", "KLO", "DWL", "RKL", "Wilson", "Ament"]
+        result = conn.execute(query, prop.model_dump())
+        new_prop_num = result.scalar()
+
+        for i, owner in enumerate(owners, start=1):
+            if prop.owned_by and owner in prop.owned_by:
+                conn.execute(
+                    text("INSERT INTO property_ownership (property_id, owner_id) VALUES (:pid, :oid);"),
+                    {"pid": new_prop_num, "oid": i}
+                )
+    return {"message": "Property added", "property_id": new_prop_num}
