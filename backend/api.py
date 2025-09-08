@@ -14,7 +14,7 @@ security = HTTPBasic()
 SHARED_PASSWORD = os.getenv("APP_PASSWORD", "changeme")
 
 class Property(BaseModel):
-    asset_num: str
+    asset_num: int
     legal_description: Optional[str] = None
     location: Optional[str] = None
     account_number: Optional[str] = None
@@ -87,14 +87,6 @@ def add_property(prop: Property):
     """)
 
     with engine.begin() as conn:
-
-        exists = conn.execute(
-            text('SELECT 1 FROM properties WHERE "asset_#" = :asset_num'),
-            {"asset_num": prop.asset_num}
-        ).first()
-        
-        if exists:
-            return {"error": "Asset number already exists."}
         
         owners = ["JLA", "DLE", "SE", "JE", "KLO", "DWL", "RKL", "Wilson", "Ament"]
         result = conn.execute(query, prop.model_dump())

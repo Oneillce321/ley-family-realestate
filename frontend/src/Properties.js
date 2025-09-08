@@ -7,7 +7,7 @@ function Properties() {
   const [properties, setProperties] = useState([]);
   const [refresh, setRefresh] = useState(false);
   const [newProperty, setNewProperty] = useState({
-    asset_num: "",
+    asset_num: null,
     legal_description: "",
     location: "",
     account_number: "",
@@ -40,7 +40,7 @@ function Properties() {
         .then(res => res.json())
         .then(data => setProperties(data));
     }
-  }, [selectedOwner],);
+  }, [selectedOwner, refresh]);
 
    const handleAddProperty = () => {
 
@@ -52,6 +52,8 @@ function Properties() {
         payload[key] = null;
         }
     });
+
+    payload["asset_num"] = properties.length + 1;
 
     // Convert number-like fields
     ["acres", "square_footage", "current_appraisal", "total_acreage_percent"].forEach(field => {
@@ -74,7 +76,7 @@ function Properties() {
             setRefresh(!refresh); // trigger refresh if needed
         }
         setNewProperty({
-            asset_num: "",
+            asset_num: null,
             legal_description: "",
             location: "",
             account_number: "",
@@ -113,6 +115,8 @@ function Properties() {
       <div className="mb-4 p-4 border rounded bg-gray-100">
         <h2 className="font-semibold mb-2">Add New Property</h2>
         {Object.keys(newProperty).map((field) => (
+            
+        field === "asset_num" ? null :
           <input
             key={field}
             className="border p-2 m-1"
