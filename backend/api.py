@@ -9,15 +9,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 
-
 BASE_DIR = os.path.dirname(__file__)
 dotenv_path = os.path.join(BASE_DIR, ".env")
 load_dotenv(dotenv_path=dotenv_path)
+
 app = FastAPI()
 security = HTTPBasic()
+
 SHARED_PASSWORD = os.getenv("APP_PASSWORD", "changeme")
 
+url = os.getenv("DATABASE_URL")
+engine = create_engine(url)
 
+
+# Property class to match with database
 class Property(BaseModel):
     asset_num: int
     legal_description: Optional[str] = None
@@ -35,6 +40,7 @@ class Property(BaseModel):
     management_notes: Optional[str] = None
     status: Optional[str] = None
 
+# Check for correct password
 def check_password(credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.password != SHARED_PASSWORD:
         raise HTTPException(status_code=401, detail="Invalid password")
@@ -47,14 +53,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-#Have to set database URL
-url = os.getenv("DATABASE_URL")
-engine = create_engine(url)
 
+# Login
 @app.post("/login")
 def login(auth: bool = Depends(check_password)):
     return {"message": "Login successful"}
 
+# Delete
 @app.delete("/properties/{asset_num}")
 def delete_property(asset_num: int):
     with engine.begin() as conn:
@@ -70,11 +75,13 @@ def delete_property(asset_num: int):
         )
     return {"message": f"Property {asset_num} deleted"}
 
+# Get List of Owners
 @app.get("/owners")
 def get_owners():
     df = pd.read_sql("SELECT * FROM owners;", engine)
     return df.to_dict(orient="records")
 
+# Get List of Properties
 @app.get("/properties")
 def get_properties(owner_id: int = None):
     if owner_id:
@@ -91,6 +98,7 @@ def get_properties(owner_id: int = None):
     # Convert safely to JSON-serializable object
     return json.loads(df.to_json(orient="records"))
 
+# Add New Property
 @app.post("/properties")
 def add_property(prop: Property):
     
@@ -108,10 +116,12 @@ def add_property(prop: Property):
 
     with engine.begin() as conn:
         
+        # Add Property to Database
         owners = ["JLA", "DLE", "SE", "JE", "KLO", "DWL", "RKL", "Wilson", "Ament"]
         result = conn.execute(query, prop.model_dump())
         new_prop_num = result.scalar()
 
+        # Update Ownership Table
         for i, owner in enumerate(owners, start=1):
             if prop.owned_by and owner in prop.owned_by:
                 conn.execute(

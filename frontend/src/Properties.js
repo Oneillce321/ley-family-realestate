@@ -26,14 +26,17 @@ function Properties() {
   
   const API_URL = process.env.REACT_APP_API_URL;
 
-  // FETCH OWNERS AND PROPERTIES
+  // Fetch Owners
   useEffect(() => {
     fetch(`${API_URL}/owners`)
       .then(res => res.json())
       .then(data => setOwners(data));
   }, [API_URL]);
 
+
+  // Fetch Properties
   useEffect(() => {
+
     if (selectedOwner) {
       fetch(`${API_URL}/properties?owner_id=${selectedOwner}`)
         .then(res => res.json())
@@ -45,8 +48,11 @@ function Properties() {
     }
   }, [selectedOwner, refresh, API_URL]);
 
-  // HANDLE DELETE PROPERTY
+
+  // Handle Delete Property
    const handleDeleteProperty = (assetNum) => {
+
+    // Confirm Deletion
       const confirmDelete = window.confirm(
       `Are you sure you want to delete property #${assetNum}?`
     );
@@ -66,7 +72,7 @@ function Properties() {
   };
 
 
-  // HANDLE ADD PROPERTY
+  // Handle Add Property
    const handleAddProperty = () => {
 
     const payload = { ...newProperty };
@@ -78,6 +84,7 @@ function Properties() {
         }
     });
 
+    // Set Next Asset Number
     const maxAssetNum = properties.reduce((max, prop) => {
         const num = parseInt(prop["asset_#"], 10);
         return isNaN(num) ? max : Math.max(max, num);
@@ -126,7 +133,8 @@ function Properties() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Real Estate Properties</h1>
-    
+
+      {/* Owner Select Dropdown */}
       <select
         className="border p-2 mb-4"
         value={selectedOwner}
@@ -139,7 +147,8 @@ function Properties() {
           </option>
         ))}
       </select>
-
+      
+      {/* Add Properties Inputs */}
       <div className="mb-4 p-4 border rounded bg-gray-100">
         <h2 className="font-semibold mb-2">Add New Property</h2>
         {Object.keys(newProperty).map((field) => (
@@ -163,6 +172,7 @@ function Properties() {
         </button>
       </div>
 
+      {/* Properties Table */}
       <table className="border-collapse border border-gray-400 w-full">
         <thead>
           <tr>
