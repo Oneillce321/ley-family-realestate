@@ -72,7 +72,7 @@ function Properties() {
   };
 
 
-  // Handle Add Property
+  // Handle Add Property 
    const handleAddProperty = () => {
 
     const payload = { ...newProperty };
