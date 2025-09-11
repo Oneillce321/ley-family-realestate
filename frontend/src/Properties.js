@@ -23,25 +23,50 @@ function Properties() {
     managment_notes: "",
     status: ""
     });
+  
+  const API_URL = process.env.REACT_APP_API_URL;
 
+  // FETCH OWNERS AND PROPERTIES
   useEffect(() => {
-    fetch("https://ley-family-realestate.onrender.com/owners")
+    fetch(`${API_URL}/owners`)
       .then(res => res.json())
       .then(data => setOwners(data));
-  }, []);
+  }, [API_URL]);
 
   useEffect(() => {
     if (selectedOwner) {
-      fetch(`https://ley-family-realestate.onrender.com/properties?owner_id=${selectedOwner}`)
+      fetch(`${API_URL}/properties?owner_id=${selectedOwner}`)
         .then(res => res.json())
         .then(data => setProperties(data));
     } else {
-      fetch("https://ley-family-realestate.onrender.com/properties")
+      fetch(`${API_URL}/properties`)
         .then(res => res.json())
         .then(data => setProperties(data));
     }
-  }, [selectedOwner, refresh]);
+  }, [selectedOwner, refresh, API_URL]);
 
+  // HANDLE DELETE PROPERTY
+   const handleDeleteProperty = (assetNum) => {
+      const confirmDelete = window.confirm(
+      `Are you sure you want to delete property #${assetNum}?`
+    );
+
+    if (!confirmDelete) return;
+
+    fetch(`${API_URL}/properties/${parseInt(assetNum, 10)}`, {
+      method: "DELETE",
+    })
+      .then(res => {
+        if (res.ok) {
+          setRefresh(!refresh); // trigger refresh if needed
+        } else {
+          alert(`Failed to delete property with Asset #${assetNum}`);
+        }
+      });
+  };
+
+
+  // HANDLE ADD PROPERTY
    const handleAddProperty = () => {
 
     const payload = { ...newProperty };
@@ -53,7 +78,11 @@ function Properties() {
         }
     });
 
-    payload["asset_num"] = properties.length + 1;
+    const maxAssetNum = properties.reduce((max, prop) => {
+        const num = parseInt(prop["asset_#"], 10);
+        return isNaN(num) ? max : Math.max(max, num);
+    }, 0);
+    payload["asset_num"] = maxAssetNum + 1;
 
     // Convert number-like fields
     ["acres", "square_footage", "current_appraisal", "total_acreage_percent"].forEach(field => {
@@ -62,7 +91,7 @@ function Properties() {
         }
     });
 
-    fetch("https://ley-family-realestate.onrender.com/properties", {
+    fetch(`${API_URL}/properties`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -72,7 +101,6 @@ function Properties() {
         if (data.error) {
             alert(data.error);
         } else{
-            setProperties([...properties, data]); // update UI with new row
             setRefresh(!refresh); // trigger refresh if needed
         }
         setNewProperty({
@@ -155,6 +183,15 @@ function Properties() {
               <td className="border p-2">{prop.account_number}</td>
               <td className="border p-2">{prop.acres}</td>
               <td className="border p-2">{prop.owned_by}</td>
+
+              <td className="border p-2">
+                <button
+                  className="bg-red-500 text-white px-2 py-1 rounded"
+                  onClick={() => handleDeleteProperty(prop["asset_#"])}
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

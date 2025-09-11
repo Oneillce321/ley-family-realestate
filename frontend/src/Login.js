@@ -2,10 +2,11 @@ import { useState } from "react";
 
 function Login({ setLoggedIn }) {
   const [password, setPassword] = useState("");
+  const API_URL = process.env.REACT_APP_API_URL
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch("https://ley-family-realestate.onrender.com/login", {
+    const res = await fetch(`${API_URL}/login`, {
       method: "POST",
       headers: {
         Authorization: "Basic " + btoa("user:" + password),

@@ -6,12 +6,17 @@ from sqlalchemy import create_engine, text
 import pandas as pd
 import json
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 import os
 
+
+BASE_DIR = os.path.dirname(__file__)
+dotenv_path = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path=dotenv_path)
 app = FastAPI()
 security = HTTPBasic()
-
 SHARED_PASSWORD = os.getenv("APP_PASSWORD", "changeme")
+
 
 class Property(BaseModel):
     asset_num: int
@@ -49,6 +54,21 @@ engine = create_engine(url)
 @app.post("/login")
 def login(auth: bool = Depends(check_password)):
     return {"message": "Login successful"}
+
+@app.delete("/properties/{asset_num}")
+def delete_property(asset_num: int):
+    with engine.begin() as conn:
+        conn.execute(
+            text("""DELETE FROM properties WHERE "asset_#" = :asset_num"""),
+            {"asset_num": asset_num}
+
+        )
+
+        conn.execute(
+            text("""DELETE FROM property_ownership WHERE property_id = :asset_num"""),
+            {"asset_num": asset_num}
+        )
+    return {"message": f"Property {asset_num} deleted"}
 
 @app.get("/owners")
 def get_owners():
