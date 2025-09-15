@@ -1,7 +1,11 @@
 import pandas as pd
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
 import os
 
+BASE_DIR = os.path.dirname(__file__)
+dotenv_path = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path=dotenv_path)
 
 # Load the Excel file and read the specified sheet
 df = pd.read_excel("Schedule of Land with Owners.xlsx", sheet_name="Property List", skiprows=3, nrows=38)
@@ -54,7 +58,7 @@ df["owned_by"] = df["owned_by"].fillna("")  # Fill NaN with empty string for eas
 # Iterate through each asset with owners
 for i in range(len(df["owned_by"])):
     curr_owners = df["owned_by"].iloc[i]
-    curr_asset = df["asset_#"].iloc[i]
+    curr_asset = df["asset_num"].iloc[i]
 
     # Iterate through each owner and check if they are in the current asset's owners
     for j, owner in enumerate(owners, start=1):

@@ -6,6 +6,8 @@ function Properties() {
   const [selectedOwner, setSelectedOwner] = useState("");
   const [properties, setProperties] = useState([]);
   const [refresh, setRefresh] = useState(false);
+  const [editRowId, setEditRowId] = useState(null);
+  const [editFormData, setEditFormData] = useState({});
   const [newProperty, setNewProperty] = useState({
     asset_num: null,
     legal_description: "",
@@ -86,7 +88,7 @@ function Properties() {
 
     // Set Next Asset Number
     const maxAssetNum = properties.reduce((max, prop) => {
-        const num = parseInt(prop["asset_#"], 10);
+        const num = parseInt(prop.asset_num, 10);
         return isNaN(num) ? max : Math.max(max, num);
     }, 0);
     payload["asset_num"] = maxAssetNum + 1;
@@ -128,6 +130,47 @@ function Properties() {
             status: ""
         }); // reset form
       });
+  };
+
+   const handleEditClick = (property) => {
+    setEditRowId(property.asset_num); // Start editing this row
+    setEditFormData({ ...property }); // Copy current values
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveClick = async () => {
+    try {
+      const res = await fetch(`${API_URL}/properties/${editRowId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editFormData),
+      });
+
+      if (res.ok) {
+        // Update local state
+        setProperties((prev) =>
+          prev.map((p) =>
+            p.asset_num === editRowId ? { ...editFormData } : p
+          )
+        );
+        setEditRowId(null); // Exit edit mode
+      } else {
+        alert("Failed to save changes");
+      }
+    } catch (err) {
+      console.error("Error saving changes:", err);
+    }
+  };
+
+  const handleCancelClick = () => {
+    setEditRowId(null); // Exit edit mode without saving
   };
 
   return (
@@ -185,23 +228,98 @@ function Properties() {
           </tr>
         </thead>
         <tbody>
-          {properties.map((prop, idx) => (
-            <tr key={idx}>
-              <td className="border p-2">{prop["asset_#"]}</td>
-              <td className="border p-2">{prop.legal_description}</td>
-              <td className="border p-2">{prop.location}</td>
-              <td className="border p-2">{prop.account_number}</td>
-              <td className="border p-2">{prop.acres}</td>
-              <td className="border p-2">{prop.owned_by}</td>
+           {properties.map((prop) => (
+            <tr key={prop.asset_num}>
+              <td className="border p-2">{prop.asset_num}</td>
 
-              <td className="border p-2">
-                <button
-                  className="bg-red-500 text-white px-2 py-1 rounded"
-                  onClick={() => handleDeleteProperty(prop["asset_#"])}
-                >
-                  Delete
-                </button>
-              </td>
+              {editRowId === prop.asset_num ? (
+                <>
+                  <td className="border p-2">
+                    <input
+                      type="text"
+                      name="legal_description"
+                      value={editFormData.legal_description}
+                      onChange={handleEditChange}
+                      className="border p-1 w-full"
+                    />
+                  </td>
+                  <td className="border p-2">
+                    <input
+                      type="text"
+                      name="location"
+                      value={editFormData.location}
+                      onChange={handleEditChange}
+                      className="border p-1 w-full"
+                    />
+                  </td>
+                  <td className="border p-2">
+                    <input
+                      type="text"
+                      name="account_number"
+                      value={editFormData.account_number}
+                      onChange={handleEditChange}
+                      className="border p-1 w-full"
+                    />
+                  </td>
+                  <td className="border p-2">
+                    <input
+                      type="number"
+                      name="acres"
+                      value={editFormData.acres}
+                      onChange={handleEditChange}
+                      className="border p-1 w-full"
+                    />
+                  </td>
+                  <td className="border p-2">
+                    <input
+                      type="text"
+                      name="owned_by"
+                      value={editFormData.owned_by}
+                      onChange={handleEditChange}
+                      className="border p-1 w-full"
+                    />
+                  </td>
+                  <td className="border p-2">
+                    <button
+                      onClick={handleSaveClick}
+                      className="bg-green-500 text-white px-2 py-1 rounded mr-2"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleCancelClick}
+                      className="bg-gray-400 text-white px-2 py-1 rounded"
+                    >
+                      Cancel
+                    </button>
+                  </td>
+                </>
+              ) : (
+                <>
+                  <td className="border p-2">{prop.legal_description}</td>
+                  <td className="border p-2">{prop.location}</td>
+                  <td className="border p-2">{prop.account_number}</td>
+                  <td className="border p-2">{prop.acres}</td>
+                  <td className="border p-2">{prop.owned_by}</td>
+                  <td className="border p-2">
+                    <button
+                      onClick={() => handleEditClick(prop)}
+                      className="bg-blue-500 text-white px-2 py-1 rounded"
+                    >
+                      Edit
+                    </button>
+                  </td>
+
+                  <td className="border p-2">
+                    <button
+                      className="bg-red-500 text-white px-2 py-1 rounded"
+                      onClick={() => handleDeleteProperty(prop.asset_num)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </>
+              )}
             </tr>
           ))}
         </tbody>

@@ -64,7 +64,7 @@ def login(auth: bool = Depends(check_password)):
 def delete_property(asset_num: int):
     with engine.begin() as conn:
         conn.execute(
-            text("""DELETE FROM properties WHERE "asset_#" = :asset_num"""),
+            text("""DELETE FROM properties WHERE asset_num = :asset_num"""),
             {"asset_num": asset_num}
 
         )
@@ -88,7 +88,7 @@ def get_properties(owner_id: int = None):
         query = """
         SELECT p.* 
         FROM properties p
-        JOIN property_ownership po ON p."asset_#" = po.property_id
+        JOIN property_ownership po ON p.asset_num = po.property_id
         WHERE po.owner_id = %s;
         """
         df = pd.read_sql(query, engine, params=(owner_id,))
@@ -104,14 +104,14 @@ def add_property(prop: Property):
     
     query = text("""
     INSERT INTO properties (
-        "asset_#", legal_description, location, account_number, current_appraisal,
+        asset_num, legal_description, location, account_number, current_appraisal,
         square_footage, acres, "%_of_total_acreage", owned_by, exemption,
         county, name_on_account, mailing_address, management_notes, status
     ) VALUES (
         :asset_num, :legal_description, :location, :account_number, :current_appraisal,
         :square_footage, :acres, :total_acreage_percent, :owned_by, :exemption,
         :county, :name_on_account, :mailing_address, :management_notes, :status
-    ) RETURNING "asset_#";
+    ) RETURNING asset_num;
     """)
 
     with engine.begin() as conn:
@@ -129,3 +129,21 @@ def add_property(prop: Property):
                     {"pid": new_prop_num, "oid": i}
                 )
     return {"message": "Property added", "property_id": new_prop_num}
+
+@app.put("/properties/{asset_num}")
+def update_property(asset_num: int, prop: Property):
+    with engine.begin() as conn:
+        query = text("""
+            UPDATE properties
+            SET legal_description = :legal_description,
+                location = :location,
+                account_number = :account_number,
+                acres = :acres,
+                owned_by = :owned_by
+            WHERE asset_num = :asset_num
+            RETURNING *;
+        """)
+        result = conn.execute(query, {**prop.model_dump(), "asset_num": asset_num}).mappings().first()
+    if not result:
+        raise HTTPException(status_code=404, detail="Property not found")
+    return result
