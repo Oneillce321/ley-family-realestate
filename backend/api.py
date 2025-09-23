@@ -21,6 +21,8 @@ SHARED_PASSWORD = os.getenv("APP_PASSWORD", "changeme")
 url = os.getenv("DATABASE_URL")
 engine = create_engine(url)
 
+webpage = os.getenv("WEBPAGE_URL")
+
 
 # Property class to match with database
 class Property(BaseModel):
@@ -48,7 +50,7 @@ def check_password(credentials: HTTPBasicCredentials = Depends(security)):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # React dev server
+    allow_origins=[webpage],  # React dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

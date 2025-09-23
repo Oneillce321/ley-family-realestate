@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState} from "react";
 import "./App.css";
 
 function Properties() {
@@ -8,6 +8,7 @@ function Properties() {
   const [refresh, setRefresh] = useState(false);
   const [editRowId, setEditRowId] = useState(null);
   const [editFormData, setEditFormData] = useState({});
+  const [dropdownRowId, setDropdownRowId] = useState(null);
   const [newProperty, setNewProperty] = useState({
     asset_num: null,
     legal_description: "",
@@ -173,6 +174,14 @@ function Properties() {
     setEditRowId(null); // Exit edit mode without saving
   };
 
+  const handleDropClick = (assetNum) => {
+    if (assetNum === dropdownRowId){
+      setDropdownRowId(null)
+    }else {
+      setDropdownRowId(assetNum)
+    }
+  }
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Real Estate Properties</h1>
@@ -222,105 +231,136 @@ function Properties() {
             <th className="border p-2">Asset #</th>
             <th className="border p-2">Legal Description</th>
             <th className="border p-2">Location</th>
-            <th className="border p-2">Account Number</th>
-            <th className="border p-2">Acres</th>
             <th className="border p-2">Owned By</th>
+            <th className="border p-2">Management Notes</th>
+            <th className="border p-2">Status</th>
           </tr>
+
         </thead>
         <tbody>
            {properties.map((prop) => (
-            <tr key={prop.asset_num}>
-              <td className="border p-2">{prop.asset_num}</td>
 
-              {editRowId === prop.asset_num ? (
-                <>
-                  <td className="border p-2">
-                    <input
-                      type="text"
-                      name="legal_description"
-                      value={editFormData.legal_description}
-                      onChange={handleEditChange}
-                      className="border p-1 w-full"
-                    />
-                  </td>
-                  <td className="border p-2">
-                    <input
-                      type="text"
-                      name="location"
-                      value={editFormData.location}
-                      onChange={handleEditChange}
-                      className="border p-1 w-full"
-                    />
-                  </td>
-                  <td className="border p-2">
-                    <input
-                      type="text"
-                      name="account_number"
-                      value={editFormData.account_number}
-                      onChange={handleEditChange}
-                      className="border p-1 w-full"
-                    />
-                  </td>
-                  <td className="border p-2">
-                    <input
-                      type="number"
-                      name="acres"
-                      value={editFormData.acres}
-                      onChange={handleEditChange}
-                      className="border p-1 w-full"
-                    />
-                  </td>
-                  <td className="border p-2">
-                    <input
-                      type="text"
-                      name="owned_by"
-                      value={editFormData.owned_by}
-                      onChange={handleEditChange}
-                      className="border p-1 w-full"
-                    />
-                  </td>
-                  <td className="border p-2">
-                    <button
-                      onClick={handleSaveClick}
-                      className="bg-green-500 text-white px-2 py-1 rounded mr-2"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={handleCancelClick}
-                      className="bg-gray-400 text-white px-2 py-1 rounded"
-                    >
-                      Cancel
-                    </button>
-                  </td>
-                </>
-              ) : (
-                <>
-                  <td className="border p-2">{prop.legal_description}</td>
-                  <td className="border p-2">{prop.location}</td>
-                  <td className="border p-2">{prop.account_number}</td>
-                  <td className="border p-2">{prop.acres}</td>
-                  <td className="border p-2">{prop.owned_by}</td>
-                  <td className="border p-2">
-                    <button
-                      onClick={() => handleEditClick(prop)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded"
-                    >
-                      Edit
-                    </button>
-                  </td>
+             <>
+              {/* Main Row */}
+              <tr>
+                <td className="border p-2">{prop.asset_num}</td>
 
-                  <td className="border p-2">
-                    <button
-                      className="bg-red-500 text-white px-2 py-1 rounded"
-                      onClick={() => handleDeleteProperty(prop.asset_num)}
-                    >
-                      Delete
-                    </button>
+                {editRowId === prop.asset_num ? (
+                  <>
+                    <td className="border p-2">
+                      <input
+                        type="text"
+                        name="legal_description"
+                        value={editFormData.legal_description}
+                        onChange={handleEditChange}
+                        className="border p-1 w-full"
+                      />
+                    </td>
+                    <td className="border p-2">
+                      <input
+                        type="text"
+                        name="location"
+                        value={editFormData.location}
+                        onChange={handleEditChange}
+                        className="border p-1 w-full"
+                      />
+                    </td>
+                    <td className="border p-2">
+                      <input
+                        type="text"
+                        name="owned_by"
+                        value={editFormData.owned_by}
+                        onChange={handleEditChange}
+                        className="border p-1 w-full"
+                      />
+                    </td>
+                    <td className="border p-2">
+                      <input
+                        type="text"
+                        name="management_notes"
+                        value={editFormData.management_notes}
+                        onChange={handleEditChange}
+                        className="border p-1 w-full"
+                      />
+                    </td>
+                    <td className="border p-2">
+                      <input
+                        type="text"
+                        name="status"
+                        value={editFormData.status}
+                        onChange={handleEditChange}
+                        className="border p-1 w-full"
+                      />
+                    </td>
+                    <td className="border p-2">
+                      <button
+                        onClick={handleSaveClick}
+                        className="bg-green-500 text-white px-2 py-1 rounded mr-2"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={handleCancelClick}
+                        className="bg-gray-400 text-white px-2 py-1 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td className="border p-2">{prop.legal_description}</td>
+                    <td className="border p-2">{prop.location}</td>
+                    <td className="border p-2">{prop.owned_by}</td>
+                    <td className="border p-2">{prop.management_notes}</td>
+                    <td className="border p-2">{prop.status}</td>
+                    <td className="border p-2">
+                      <button
+                        onClick={() => handleDropClick(prop.asset_num)}
+                        className="bg-blue-500 text-white px-2 py-1 rounded"
+                      >
+                        {dropdownRowId === prop.asset_num ? "-" : "+"}
+                      </button>
+                    </td>
+                    <td className="border p-2">
+                      <button
+                        onClick={() => handleEditClick(prop)}
+                        className="bg-blue-500 text-white px-2 py-1 rounded"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                    <td className="border p-2">
+                      <button
+                        className="bg-red-500 text-white px-2 py-1 rounded"
+                        onClick={() => handleDeleteProperty(prop.asset_num)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </>
+                )}
+              </tr>
+
+              {/* Expanded Row */}
+              {dropdownRowId === prop.asset_num && (
+                <tr>
+                  <td colSpan="8" className="border p-4 bg-gray-50">
+                    <div className="grid grid-cols-2 gap-2">
+                      <p><strong>Account #:</strong> {prop.account_number}</p>
+                      <p><strong>Appraisal:</strong> {prop.current_appraisal}</p>
+                      <p><strong>Square Footage:</strong> {prop.square_footage}</p>
+                      <p><strong>Acres:</strong> {prop.acres}</p>
+                      <p><strong>Total Acreage %:</strong> {prop.total_acreage_percent}</p>
+                      <p><strong>Exemption:</strong> {prop.exemption}</p>
+                      <p><strong>County:</strong> {prop.county}</p>
+                      <p><strong>Name on Account:</strong> {prop.name_on_account}</p>
+                      <p><strong>Mailing Address:</strong> {prop.mailing_address}</p>
+                    </div>
                   </td>
-                </>
+                </tr>
               )}
-            </tr>
+            </>
           ))}
         </tbody>
       </table>
