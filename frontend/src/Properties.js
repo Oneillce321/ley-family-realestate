@@ -1,6 +1,6 @@
-import { useEffect, useState} from "react";
+import React, { useEffect, useState} from "react";
 import "./App.css";
-
+ 
 function Properties() {
   const [owners, setOwners] = useState([]);
   const [selectedOwner, setSelectedOwner] = useState("");
@@ -23,7 +23,7 @@ function Properties() {
     county: "",
     name_on_account: "",
     mailing_address: "",
-    managment_notes: "",
+    management_notes: "",
     status: ""
     });
   
@@ -135,7 +135,7 @@ function Properties() {
 
    const handleEditClick = (property) => {
     setEditRowId(property.asset_num); // Start editing this row
-    setEditFormData({ ...property }); // Copy current values
+    setEditFormData({ ...property}); // Copy current values
   };
 
   const handleEditChange = (e) => {
@@ -158,9 +158,10 @@ function Properties() {
         // Update local state
         setProperties((prev) =>
           prev.map((p) =>
-            p.asset_num === editRowId ? { ...editFormData } : p
+            p.asset_num === editRowId ? { ...p, ...editFormData } : p
           )
         );
+        setRefresh(!refresh);
         setEditRowId(null); // Exit edit mode
       } else {
         alert("Failed to save changes");
@@ -240,9 +241,9 @@ function Properties() {
         <tbody>
            {properties.map((prop) => (
 
-             <>
+             <React.Fragment>
               {/* Main Row */}
-              <tr>
+              <tr key={prop.asset_num}>
                 <td className="border p-2">{prop.asset_num}</td>
 
                 {editRowId === prop.asset_num ? (
@@ -360,7 +361,7 @@ function Properties() {
                   </td>
                 </tr>
               )}
-            </>
+            </React.Fragment>
           ))}
         </tbody>
       </table>

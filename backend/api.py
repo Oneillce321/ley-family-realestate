@@ -91,11 +91,12 @@ def get_properties(owner_id: int = None):
         SELECT p.* 
         FROM properties p
         JOIN property_ownership po ON p.asset_num = po.property_id
-        WHERE po.owner_id = %s;
+        WHERE po.owner_id = %s
+        ORDER BY p.asset_num;
         """
         df = pd.read_sql(query, engine, params=(owner_id,))
     else:
-        df = pd.read_sql("SELECT * FROM properties;", engine)
+        df = pd.read_sql("SELECT * FROM properties ORDER BY asset_num;", engine)
 
     # Convert safely to JSON-serializable object
     return json.loads(df.to_json(orient="records"))
@@ -139,9 +140,9 @@ def update_property(asset_num: int, prop: Property):
             UPDATE properties
             SET legal_description = :legal_description,
                 location = :location,
-                account_number = :account_number,
-                acres = :acres,
-                owned_by = :owned_by
+                owned_by = :owned_by,
+                management_notes = :management_notes,
+                status = :status
             WHERE asset_num = :asset_num
             RETURNING *;
         """)
